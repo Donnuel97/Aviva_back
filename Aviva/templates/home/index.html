@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css"
+      rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <script>
+      function redirectToLogin() {
+        window.location.href = "{% url 'login' %}";
+      }
+    </script>
+    <title>WELCOME | Aviva</title>
+  </head>
+  <body>
+    <div class="container">
+      <nav>
+        <div class="nav__logo"><img src="{% static 'img/logo.png' %}" alt="logo image" style="height: 15%; width: 15%;"/></div>
+        <ul class="nav__links">
+          <li class="link"><a href="dashboard.html">Home</a></li>
+          <li class="link"><a href="#">About</a></li>
+          <li class="link"><a href="#">Blog</a></li>
+          <li class="link"><a href="#">Contact</a></li>
+        </ul>
+        <button class="btn" onclick="redirectToLogin()">Login</button>
+        
+      </nav>
+ 
+      <span class="register-head"></span>
+      <span class="register-body"></span>
+      <header class="header">
+        <div class="content">
+          <h1><span>Welcome,</span><br> Good to have you back</h1>
+          <p>
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptas et consectetur, error dolor expedita in voluptatum, similique officia ex ducimus quibusdam accusantium, cum tenetur? Ducimus odio minus eligendi dolorum obcaecati?
+          </p>
+          <button class="btn">Learn more</button>
+        </div>
+        <div class="image">
+          
+          <img src="{% static 'img/aviva.jpg' %}" alt="header image" style="border-radius: 50%;"/>  
+        </div>
+      </header>
+      
+    </div>
+    
+  </body>
+  </body>
+</html>
