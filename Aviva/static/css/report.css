@@ -1,133 +1,25 @@
-/* Apply flexbox to the .btn-download container */
-.btn-download {
-    display: flex; /* Use flexbox */
-    justify-content: flex-start; /* Align buttons to the left */
-}
-.overview-dropdown {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.select-menu {
-    flex: 1;
-    margin-right: 10px; /* Adjust the margin as needed */
-}
-/* Style for the buttons */
-.btn-download button {
-    margin-right: 10px; /* Add some space between the buttons */
-    background-color: #176F6C;
-    color: #fff;
-    height: 30px;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-left: 20px; 
-    text-decoration: none;
-    width: 200px;
-    font-family:Arial, Helvetica, sans-serif;
-    font-size: 14px;
-}
-.btn-download button:hover {
-    background-color: #17AEAC;
-}
-/* Table design */
-
-.image-container {
-    text-align: center;
-}
-
-.review img {
-    height: 50px;
-    width: 50px;
-    display: block;
-    margin: 0 auto;
-    border-radius: 20%;
-}
-.report-cont td{
-    font-size: 12px;
-}
-
-.table-report {
-    height: 200px;
-   
-}
-
-table {
-    width: 100%;
-    text-align:left;
-    border-collapse: collapse;
-}
-
-tr {
-    border-bottom: 1px solid #f1f1f1;
-}
-
-td,
-th {
-    padding-block: 10px;
-    text-align: left;
-    width: 50px;
-    font-size: 12px
-}
-
-
-/* Style for the form */
-.overview-dropdown {
-    background-color: #f1f4f8;
-    padding: 20px;
-    border-radius: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-/* Style for labels */
-label {
-    font-weight: bold;
-    margin-right: 10px;
-}
-
-/* Style for select boxes */
-select {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 200px; /* Adjust the width as needed */
-    margin-bottom: 10px;
-    display: flex;
-    height: 40px;
-    background: #fff;
-    padding: 20px;
-    font-size: 14px;
-    font-weight: 400;
-    border-radius: 8px;
-    align-items: center;
-    cursor: pointer;
-    justify-content: space-between;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    flex-grow: 1;
-}
-
-/* Style for the filter button */
-button[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
+/* Define common styles for both buttons */
+.custom-button {
     padding: 10px 20px;
+    background-color: #007bff; /* Blue background color */
+    color: #fff; /* White text color */
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s;
+    margin-right: 10px; /* Add some margin between buttons */
 }
 
-button[type="submit"]:hover {
-    background-color: #0056b3;
+/* Styles for the "Export as PDF" button */
+.pdf-button {
+    background-color: #FF5733; /* Change the background color for PDF button */
 }
 
-/* Add responsive design as needed for different screen sizes */
-@media (max-width: 768px) {
-    select {
-        width: 100%; /* Full width on smaller screens */
-    }
+/* Styles for the "Export as Excel" button */
+.excel-button {
+    background-color: #2ECC71; /* Change the background color for Excel button */
 }
 
+/* Hover effect for both buttons */
+.custom-button:hover {
+    background-color: #0056b3; /* Darker blue background color on hover */
+}

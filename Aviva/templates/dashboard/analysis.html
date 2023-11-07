@@ -1,114 +1,23 @@
+{%  extends 'dashboard/main.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" charset="utf-8"></script>
-    <title>Dashboard</title>
-</head>
+{% block content %}
+<!--Beginning of chart-->
+<div class="charts">
 
-<body>
-    <section class="header">
-        <div class="logo">
-            <i class="ri-menu-line icon icon-0 menu"></i>
-            <img src="assets/images/logo.png" style="height: 30%; width: 28%;position: relative;">
-        </div>
-        <div class="search--notification--profile">
-          
-            <div class="notification--profile">
-                <div class="picon bell">
-                    <i class="ri-download-2-line"></i>
-                </div>
-                <div class="picon chat">
-                    <i class="ri-wechat-2-line"></i>
-                </div>
-                
-            </div>
-        </div>
-    </section>
+    <div class="charts-card">
+      <h2 class="chart-title">Number of women screened</h2>
+      <img src="data:image/png;base64,{{ bar_chart_image }}" alt="Bar Chart" width="500" height="400">
+    </div>
 
-  
-    <section class="main">
+    <div class="charts-card">
+      <h2 class="chart-title">Number Of Patients Who Had Cryotherapy/Thermal Ablation</h2>
+      <img src="data:image/png;base64,{{ area_chart_image }}" alt="Area Chart" width="500" height="400">
 
-        <!-- Side navigation begins here -->
-        <div class="sidebar">
-            <ul class="sidebar--items">
-                <li>
-                    <a href="{% url 'dash' %}" >
-                        <span class="icon icon-1"><i class="ri-layout-grid-line"></i></span>
-                        <span class="sidebar--item">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'reviewed' %}">
-                        <span class="icon icon-2"><i class="ri-folder-2-line"></i></span>
-                        <span class="sidebar--item has-submenu">Reviewed Cases</span>
-                    </a>
-                    
-                </li>
-                <li>
-                    <a href="{% url 'pending' %}">
-                        <span class="icon icon-2"><i class="ri-folder-2-line"></i></span>
-                        <span class="sidebar--item has-submenu">Pending Cases</span>
-                    </a>
-                    
-                </li>
-                <li>
-                    <a href="{% url 'analysis' %}" id="active--link">
-                        <span class="icon icon-3"><i class="ri-pie-chart-line"></i></span>
-                        <span class="sidebar--item" style="white-space: nowrap;">Analytics</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'report' %}">
-                        <span class="icon icon-4"><i class="ri-file-text-line"></i></span>
-                        <span class="sidebar--item">Report</span>
-                    </a>
-                </li>
-                
-            </ul>
-            <ul class="sidebar--bottom-items">
-                <li>
-                    <a href="#">
-                        <span class="icon icon-8"><i class="ri-logout-box-r-line"></i></span>
-                        <span class="sidebar--item">Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-         <!-- Side navigation ends here -->
+    </div>
 
-         <!-- Main body begins here -->
-        <div class="main--content">
-            <!--Beginning of chart-->
-            <div class="charts">
+  </div>
+  <!--end of chart-->
+{% endblock %}
 
-                <div class="charts-card">
-                  <h2 class="chart-title">Number of women screened</h2>
-                  <div id="bar-chart"></div>
-                </div>
-      
-                <div class="charts-card">
-                  <h2 class="chart-title">Number Of Patients Who Had Cryotherapy/Thermal Ablation</h2>
-                  <div id="area-chart"></div>
-                </div>
-      
-              </div>
-              <!--end of chart-->
-        </div>
-        <!-- Main body ends here -->
-    </section>
-    <!-- ApexCharts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.35.5/apexcharts.min.js"></script>
-    <!-- Custom JS -->
-    <script src="assets/js/chart.js"></script>
-    <script src="assets/js/main.js"></script>
-</body>
 
-</html>

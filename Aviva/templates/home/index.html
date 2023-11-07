@@ -9,8 +9,13 @@
       rel="stylesheet"/>
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script>
-      function redirectToLogin() {
-        window.location.href = "{% url 'login' %}";
+      function checkAndRedirect() {
+        // Check if the user is logged in
+        {% if request.session.userid %}
+          window.location.href = "{% url 'dashboard' %}";  // Redirect to the dashboard
+        {% else %}
+          window.location.href = "{% url 'login' %}";  // Redirect to the login page
+        {% endif %}
       }
     </script>
     <title>WELCOME | Aviva</title>
@@ -25,8 +30,7 @@
           <li class="link"><a href="#">Blog</a></li>
           <li class="link"><a href="#">Contact</a></li>
         </ul>
-        <button class="btn" onclick="redirectToLogin()">Login</button>
-        
+        <button class="btn" onclick="checkAndRedirect()">Login</button>
       </nav>
  
       <span class="register-head"></span>

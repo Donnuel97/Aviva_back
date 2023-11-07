@@ -662,6 +662,34 @@ th {
 }
 /* responsive starts here */
 
+
+/* Define common styles for both buttons */
+.custom-button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue background color */
+    color: #fff; /* White text color */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px; /* Add some margin between buttons */
+}
+
+/* Styles for the "Export as PDF" button */
+.pdf-button {
+    background-color: #FF5733; /* Change the background color for PDF button */
+}
+
+/* Styles for the "Export as Excel" button */
+.excel-button {
+    background-color: #2ECC71; /* Change the background color for Excel button */
+}
+
+/* Hover effect for both buttons */
+.custom-button:hover {
+    background-color: #0056b3; /* Darker blue background color on hover */
+}
+
+
 @media screen and (max-width:1350px) {
     .cards,
     .doctors--cards {

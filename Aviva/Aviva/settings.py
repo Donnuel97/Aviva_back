@@ -121,12 +121,16 @@ PASSWORD_HASHERS = [
 #    'django.contrib.auth.backends.ModelBackend',  # Include the default ModelBackend as a fallback
 #]
 
-AUTHENTICATION_BACKENDS = [
-    'dashboard.auth_backends.LegacyModelBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
 
-LOGIN_REDIRECT_URL = '/success/'
+# ...
+
+# Set the session timeout to 24 hours (86400 seconds)
+SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
+SESSION_SAVE_EVERY_REQUEST = True  # Add this line to save the session with every request
+
+
+# ...
+
 
 
 

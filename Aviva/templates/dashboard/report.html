@@ -1,194 +1,109 @@
+{% extends 'dashboard/main.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
+{% block content %}
+<!-- Main body begins here -->
+        
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/dash.css' %}">
-    <link rel="stylesheet" href="{% static 'css/report.css' %}">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-   
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
-    <!-- Include the jsPDF library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<form method="post" id="filter-form">
+    {% csrf_token %}
 
-    <!-- Include the js-xlsx library for Excel export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
-
-    <!-- Include the TableExport library -->
-    <script src="https://cdn.jsdelivr.net/npm/tableexport@5.2.0/dist/js/tableexport.min.js"></script>
-
-    <title>Dashboard</title>
-</head>
-
-<body>
-    <section class="header">
-        <div class="logo">
-            <i class="ri-menu-line icon icon-0 menu"></i>
-            <img src="{% static 'img/logo.png' %}" style="height: 30%; width: 28%;position: relative;">
-        </div>
-        <div class="search--notification--profile">
-          
-            <div class="notification--profile">
-                <div class="picon bell">
-                    <i class="ri-download-2-line"></i>
-                </div>
-                <div class="picon chat">
-                    <i class="ri-wechat-2-line"></i>
-                </div>
-                
+    <div class="overview-dropdown">
+        <div class="select-menu">
+            <div class="select-btn">
+                <select id="id_state" name="state" class="sBtn-input">
+                    {% for state, state_name in form.state.field.choices %}
+                        <option class="option" value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state_name }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
-    </section>
-    <section class="main">
-
-        <!-- Side navigation begins here -->
-        <div class="sidebar">
-            <ul class="sidebar--items">
-                <li>
-                    <a href="{% url 'dashboard' %}" >
-                        <span class="icon icon-1"><i class="ri-layout-grid-line"></i></span>
-                        <span class="sidebar--item">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'reviewed' %}">
-                        <span class="icon icon-2"><i class="ri-folder-2-line"></i></span>
-                        <span class="sidebar--item has-submenu">Reviewed Cases</span>
-                    </a>
-                    
-                </li>
-                <li>
-                    <a href="{% url 'pending' %}">
-                        <span class="icon icon-2"><i class="ri-folder-2-line"></i></span>
-                        <span class="sidebar--item has-submenu">Pending Cases</span>
-                    </a>
-                    
-                </li>
-                <li>
-                    <a href="{% url 'analytics' %}" >
-                        <span class="icon icon-3"><i class="ri-pie-chart-line"></i></span>
-                        <span class="sidebar--item" style="white-space: nowrap;">Analytics</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'report' %}" id="active--link">
-                        <span class="icon icon-4"><i class="ri-file-text-line"></i></span>
-                        <span class="sidebar--item">Report</span>
-                    </a>
-                </li>
-                
-            </ul>
-            <ul class="sidebar--bottom-items">
-                <li>
-                    <a href="#">
-                        <span class="icon icon-8"><i class="ri-logout-box-r-line"></i></span>
-                        <span class="sidebar--item">Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <!-- Side navigation ends here -->
-
-        <!-- Main body begins here -->
-        
-        <div class="main--content">
-            <form method="post" id="filter-form">
-                {% csrf_token %}
-            
-                <div class="overview-dropdown">
-                    <div class="select-menu">
-                        <div class="select-btn">
-                            <select id="id_state" name="state" class="sBtn-input">
-                                {% for state, state_name in form.state.field.choices %}
-                                    <option class="option" value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="select-menu">
-                        <div class="select-btn" >
-                            <select id="id_facility" name="facility" class="sBtn-input">
-                                {% for facility, facility_name in form.facility.field.choices %}
-                                    <option class="option" value="{{ facility }}" {% if facility == selected_facility %}selected{% endif %}>{{ facility_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-            
-                    <div class="filter-button-container">
-                        <button type="submit" class="submit-button">Filter</button>
-                    </div>
-            
-                </div>
-            </form>
-            
-        
-            <div class="btn-download">
-                <button id="export-pdf">Export as PDF</button>
-                <button id="downloadexcel">Export as Excel</button>
-            </div>
-        
-            <div class="table-report">
-                
-                    <table id="table">
-                        <thead>
-                            <tr>
-                                <th>Patient ID</th>
-                                <th>Age</th>
-                                <!-- Add other fields you want to display -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in cervic_data %}
-                                <tr>
-                                    <td>{{ data.patient_id }}</td>
-                                    <td>{{ data.age }}</td>
-                                    <!-- Add other fields you want to display -->
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="10">No data available</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    
-               
+        <div class="select-menu">
+            <div class="select-btn" >
+                <select id="id_facility" name="facility" class="sBtn-input">
+                    {% for facility, facility_name in form.facility.field.choices %}
+                        <option class="option" value="{{ facility }}" {% if facility == selected_facility %}selected{% endif %}>{{ facility_name }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
-        <!-- Main body ends here -->
 
-    </section>
-    <script>
-        // JavaScript to update facility choices based on selected state
-        $('#id_state').change(function () {
-            var stateId = $(this).val();
-            $.ajax({
-                url: '/get_facilities/',
-                data: {
-                    'state_id': stateId
-                },
-                dataType: 'json',
-                success: function (data) {
-                    var facilitySelect = $('#id_facility');
-                    facilitySelect.empty();
-                    facilitySelect.append('<option value="All Facilities">All Facilities</option>');
-                    $.each(data.facilities, function (key, value) {
-                        facilitySelect.append('<option value="' + key + '">' + value + '</option>');
-                    });
-                }
+        <div class="filter-button-container">
+            <button type="submit" class="submit-button">Filter</button>
+        </div>
+
+    </div>
+</form>
+
+<div class="btn-download">
+    <button id="export-pdf" class="custom-button pdf-button">Export as PDF</button>
+    <button id="downloadexcel" class="custom-button excel-button">Export as Excel</button>
+</div>
+
+{% if total_patients_in_state %}
+    <p>Total Patients in {{ selected_state }}: {{ total_patients_in_state }}</p>
+{% endif %}
+
+<h2>Total Patients by Age Ranges:</h2>
+<ul>
+    {% for age_range, age_count in age_counts %}
+    <li>{{ age_range }}: {{ age_count }}</li>
+    {% endfor %}
+</ul>
+
+{% if is_filtered %}
+    <table id="table">
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Age</th>
+                <th>Mode</th>
+                <!-- Add other fields you want to display -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in cervic_data %}
+            <tr>
+                <td>{{ data.patient_id }}</td>
+                <td>{{ data.age }}</td>
+                <td>{{ data.mode }}</td>
+                <!-- Add more table cells for other fields -->
+            </tr>
+            {% empty %}
+            <p>No data found.</p>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No data found.</p>
+{% endif %}
+
+<!-- Main body ends here -->
+
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" charset="utf-8"></script>
+<script>
+// JavaScript to update facility choices based on selected state
+$('#id_state').change(function () {
+    var stateId = $(this).val();
+    $.ajax({
+        url: '/get_facilities/',
+        data: {
+            'state_id': stateId
+        },
+        dataType: 'json',
+        success: function (data) {
+            var facilitySelect = $('#id_facility');
+            facilitySelect.empty();
+            facilitySelect.append('<option value="All Facilities">All Facilities</option>');
+            $.each(data.facilities, function (key, value) {
+                facilitySelect.append('<option value="' + key + '">' + value + '</option>');
             });
-        });
-    </script>
-    <script type="text/javascript" src="{% static 'js/table2excel.js' %}"></script>
-    <script src="{% static 'js/report.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
-</body>
+        }
+    });
+});
+</script>
+<script type="text/javascript" src="{% static 'js/table2excel.js' %}"></script>
+<script src="{% static 'js/report.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
 
-</html>
+{% endblock %}
