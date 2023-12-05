@@ -90,63 +90,53 @@
         <!-- Main body begins here -->
         <div class="main--content">
            
-            <div class="overview-dropdown"> 
-                    <a href="reviewed.html">Submit</a>
-            </div>
+            
      
         <div class="btn-download">
             <button id="export-pdf" >Download PDF</button>
             
         </div>
         <div class="table-report">
-          
             <h2>Detail for {{ cervic_data.patient_id }}</h2>
             <p>Date in: {{ cervic_data.date_submitted|date:"d/m/Y" }}</p>
             <p>Age: {{ cervic_data.age }}</p>
             <p>Mode: {{ cervic_data.mode }}</p>
-              <table id="table">
-              <thead class="">
-                <tr>
-                  <th>Image</th>
-                  <th>Type</th>
-                  <th>Description</th>
-              
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="report-cont">
-                    <td> <img src="data:image/png;base64,{{ cervic_data.image_base64 }}" alt="Cervic Image" style="height: 150px;width: 150px;"></td>
+        
+            <table id="table">
+                <thead class="">
+                    <tr>
+                        <th>Image</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="report-cont">
+                        <td> 
+                            {% if cervic_data.image_base64 %}
+                                <img src="data:image/png;base64,{{ cervic_data.image_base64 }}" alt="Cervic Image" style="height: 150px; width: 150px;">
+                            {% endif %}
+                        </td>
+                        <td>stage 1</td>
+                        <td></td> <!-- Add a blank cell for the description if needed -->
+                    </tr>
                    
-                    <td>stage 1</td>
-                    <td>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nostrum unde dicta tenetur quo quam ad esse hic iure voluptatem assumenda.</td>
-                    
-                </tr>
-                <tr>
-                    <td><img src="data:image/png;base64,{{ cervic_data.aceticacid_base64 }}" style="height: 150px;width: 150px;" alt="Cervic Image"></td>
-                    <td>stage 2</td>
-                    <td> Omnis obcaecati nostrum iusto excepturi voluptate quaerat beatae laborum perspiciatis!</td>
-                    
-                </tr>
-                <tr>
-                    <td><img src="data:image/png;base64,{{ cervic_data.lugolsiodine_base64}}" style="height: 150px;width: 150px;" alt="Cervic Image"></td>
-                    <td>stage 3</td>
-                    <td>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nostrum unde dicta tenetur </td>
-                  
-                </tr>
-                
-              </tbody>
-                <p>Diagnosis: {{ cervic_data.initial_diagnosis }}</p>
-                <p>Treatment Options: {{ cervic_data.treatment_options }}</p>
+                </tbody>
             </table>
-            
-          </div>
+        
+            <p>Diagnosis: {{ cervic_data.initial_diagnosis }}</p>
+            <p>Treatment Options: {{ cervic_data.treatment_options }}</p>
+        </div>
+          
+          
           
         </div>
         <!-- Main body ends here -->
         
     </section>
-    <script src="assets/js/detail.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="{% static 'js/detail.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    
 </body>
 
 </html>

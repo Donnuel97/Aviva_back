@@ -146,6 +146,45 @@ class Chattabox(models.Model):
         db_table = 'chattabox'
 
 
+class DashboardCustomuser(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    password = models.CharField(max_length=128)
+    last_login = models.DateTimeField(blank=True, null=True)
+    is_superuser = models.IntegerField()
+    email = models.CharField(unique=True, max_length=254)
+    fullname = models.CharField(max_length=350)
+    phone = models.CharField(unique=True, max_length=11)
+    state = models.CharField(max_length=122)
+    facility = models.CharField(max_length=350)
+    usercategory = models.CharField(max_length=65)
+
+    class Meta:
+        managed = False
+        db_table = 'dashboard_customuser'
+
+
+class DashboardCustomuserGroups(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    customuser = models.ForeignKey(DashboardCustomuser, models.DO_NOTHING)
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'dashboard_customuser_groups'
+        unique_together = (('customuser', 'group'),)
+
+
+class DashboardCustomuserUserPermissions(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    customuser = models.ForeignKey(DashboardCustomuser, models.DO_NOTHING)
+    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'dashboard_customuser_user_permissions'
+        unique_together = (('customuser', 'permission'),)
+
+
 class DjangoAdminLog(models.Model):
     action_time = models.DateTimeField()
     object_id = models.TextField(blank=True, null=True)

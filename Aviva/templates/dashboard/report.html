@@ -39,43 +39,66 @@
     <button id="downloadexcel" class="custom-button excel-button">Export as Excel</button>
 </div>
 
-{% if total_patients_in_state %}
-    <p>Total Patients in {{ selected_state }}: {{ total_patients_in_state }}</p>
-{% endif %}
 
-<h2>Total Patients by Age Ranges:</h2>
-<ul>
-    {% for age_range, age_count in age_counts %}
-    <li>{{ age_range }}: {{ age_count }}</li>
-    {% endfor %}
-</ul>
 
-{% if is_filtered %}
     <table id="table">
-        <thead>
-            <tr>
-                <th>Patient ID</th>
-                <th>Age</th>
-                <th>Mode</th>
-                <!-- Add other fields you want to display -->
-            </tr>
-        </thead>
+        
         <tbody>
-            {% for data in cervic_data %}
+            
             <tr>
-                <td>{{ data.patient_id }}</td>
-                <td>{{ data.age }}</td>
-                <td>{{ data.mode }}</td>
+                <td>
+                    State
+                </td>
+                <td>
+                    {% if total_patients_in_state %}
+                       {{ selected_state }}</p>
+                    {% endif %}
+                </td>
+               
                 <!-- Add more table cells for other fields -->
             </tr>
-            {% empty %}
-            <p>No data found.</p>
+            <tr>
+                <td>
+                    Facility
+                </td>
+                <td>
+                    {% if selected_facility %}
+                        {{ selected_facility }}
+                    {% endif %}
+                </td>
+               
+                <!-- Add more table cells for other fields -->
+            </tr>
+
+            <tr>
+                <td>
+                   Number of women
+                </td>
+                <td>
+                    {% if total_patients_in_state %}
+                         {{ total_patients_in_state }}</p>
+                    {% endif %}
+                    
+                </td>
+                
+                <!-- Add more table cells for other fields -->
+            </tr>
+           
+            {% for age_range, age_count in age_counts %}
+            <tr>
+                <td>{{ age_range }}</td>
+                <td>{{ age_count }}</td>
+            </tr>
             {% endfor %}
+           
+        
+                
+                
+            
+            
         </tbody>
     </table>
-{% else %}
-    <p>No data found.</p>
-{% endif %}
+
 
 <!-- Main body ends here -->
 

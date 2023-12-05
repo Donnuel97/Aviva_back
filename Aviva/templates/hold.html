@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blob to Image</title>
+</head>
+<body>
+  <!-- Add some Blob images to the page -->
+  <img id="blobImage1">
+  <img id="blobImage2">
+
+  <script>
+    // Add event listener for the DOMContentLoaded event
+    document.addEventListener('DOMContentLoaded', function() {
+      // Convert Blob images present on the page
+      convertBlobImages();
+    });
+
+    function convertBlobImages() {
+      // Get the img elements with Blob images
+      const blobImageElements = document.querySelectorAll('img[id^="blobImage"]');
+
+      blobImageElements.forEach(function(imgElement) {
+        // Get the Blob data from the img element's src attribute
+        const imageUrl = imgElement.src;
+        fetch(imageUrl)
+          .then(response => response.blob())
+          .then(blob => {
+            // Create a Blob URL
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Set the img element's src attribute to the Blob URL
+            imgElement.src = blobUrl;
+          });
+      });
+    }
+  </script>
+</body>
+</html>

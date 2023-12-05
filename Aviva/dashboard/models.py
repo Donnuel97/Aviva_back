@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.models import Group, Permission 
-import hashlib
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -54,10 +54,7 @@ class AllUsers(models.Model):
     password = models.CharField(max_length=364, blank=True, null=True)
     last_login = None  # Disable the last_login field
 
-    def check_password(self, raw_password):
-        # Implement MD5 hashing logic to check the password
-        hashed_password = hashlib.md5(raw_password.encode()).hexdigest()
-        return self.password == hashed_password
+   
 
     class Meta:
         managed = False

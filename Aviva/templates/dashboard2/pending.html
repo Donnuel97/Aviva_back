@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<!-- My CSS -->
+	<link rel="stylesheet" href="{% static 'css2/dashboard.css' %}">
+
+	<title>AVIVA | Dashboard</title>
+</head>
+<body>
+
+
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+		
+			<a href="index.html" class="brand">
+				<div class="logo">
+                    <img class='bx' src="{% static 'img/icon.png' %}">
+				
+					<span class="text">AVIVA</span>
+				</div>
+				
+				
+			</a>
+		
+		
+		<ul class="side-menu top">
+			<li >
+				<a href="{% url 'dashboard' %}">
+					<i class='bx bxs-dashboard' ></i>
+					<span class="text">Dashboard</span>
+				</a>
+			</li>
+			<li>
+				<a href="{% url 'reviewed' %}">
+					<i class='bx bxs-folder-open'></i>
+					<span class="text">Reviewed cases</span>
+				</a>
+			</li>
+			<li  class="active">
+				<a href="{% url 'pending' %}">
+					<i class='bx bxs-folder-open'></i>
+					<span class="text">Pending cases</span>
+				</a>
+			</li>
+			<li>
+				<a href="{% url 'analytics' %}">
+					<i class='bx bxs-doughnut-chart' ></i>
+					<span class="text">Analytics</span>
+				</a>
+			</li>
+			<li>
+				<a href="{% url 'report' %}">
+					<i class='bx bxs-report'></i>
+					<span class="text">Report</span>
+				</a>
+			</li>
+			
+		</ul>
+		<ul class="side-menu">
+			<li>
+				<a href="#">
+					<i class='bx bxs-cog' ></i>
+					<span class="text">Settings</span>
+				</a>
+			</li>
+			{%  include 'dashboard2/logout.html' %}
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+
+
+	<!-- CONTENT -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu' ></i>
+		
+			<form action="#">
+				<div class="form-input">
+				
+				</div>
+			</form>
+			
+		
+            <p> Welcome to Aviva <b>{{ fullname }}</b></p>
+			<a href="#" class="profile">
+				
+			</a>
+		</nav>
+		<!-- NAVBAR -->
+
+		<!-- MAIN -->
+		<main>
+			<div class="head-title">
+				<div class="left">
+					<h1>Pending</h1>
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">Home</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						<li>
+							<a class="active" href="#">Dashboard</a>
+						</li>
+					</ul>
+				</div>
+				
+			</div>
+
+			{%  include 'dashboard2/display.html' %}
+            <div class="table-data">
+				<div class="order">
+					<div class="head">
+						<h3>Pending cases</h3>
+						<i class='bx bx-search' ></i>
+						<i class='bx bx-filter' ></i>
+					</div>
+					<table>
+						<thead>
+                            <tr>
+                                <th>Patient-ID</th>
+                                <th>Upload Date</th>
+                                <th>Facility</th>
+                                <th>Age</th>
+                                <th>mode</th>
+                                <th>Case Finder Diagnosis</th>
+                                <th>Review</th>
+                                <th>Treatment options</th> 
+                            </tr>
+						</thead>
+						<tbody>
+                            {% for data in cervic_data %}
+                                <tr class="table_cont">
+                                    <td>{{ data.id }}</td>
+                                    <td>{{ data.date_submitted|date:"d/m/Y" }}</td>
+                                    <td>{{ data.facility }}</td>
+                                    <td>{{ data.age }}</td>
+                                    <td>{{ data.mode }}</td>
+                                    <td class="{% if data.initial_diagnosis == 'Positive' %}positive{% else %}negative{% endif %}">{{ data.initial_diagnosis }}</td>
+                                    <td>{{ data.initial_diagnosis_other }}</td>
+                                    <td>{{ data.treatment_options }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7">No data available</td>
+                                </tr>
+                            {% endfor %}
+						</tbody>
+					</table>
+				</div>
+				
+			</div>
+
+		
+		</main>
+		<!-- MAIN -->
+	</section>
+	<!-- CONTENT -->
+	
+    <script src="{% static 'js/script2.0.js' %}"></script>
+	
+</body>
+</html>

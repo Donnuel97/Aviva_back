@@ -17,6 +17,53 @@
     </div>
 
   </div>
+  <div class="charts">
+
+    <div class="charts-card">
+        
+        <div id="pie-chart-container" style="position: relative;">
+            <img src="data:image/png;base64,{{ pie_chart_image }}" alt="Pie Chart" width="500" height="500">
+            <div id="legend" style="position: absolute; top: 10px; right: 10px;"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Add JavaScript to create the pie chart with responsive legends
+    var ctx = document.getElementById('pie-chart').getContext('2d');
+    var pieData = {
+        labels: ['Legend 1', 'Legend 2', 'Legend 3'],  // Replace with your actual labels
+        datasets: [{
+            data: [30, 40, 30],  // Replace with your actual data
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',  // Color for Legend 1
+                'rgba(75, 192, 192, 0.6)',  // Color for Legend 2
+                'rgba(255, 206, 86, 0.6)'   // Color for Legend 3
+            ],
+        }]
+    };
+
+    var pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: pieData,
+        options: {
+            responsive: true,
+            onClick: function(event, elements) {
+                var legendContainer = document.getElementById('legend');
+                if (elements && elements.length > 0) {
+                    var index = elements[0]._index;
+                    var label = pieData.labels[index];
+                    var color = pieData.datasets[0].backgroundColor[index];
+                    legendContainer.innerHTML = '<div style="background-color:' + color + '; width: 20px; height: 20px; display: inline-block;"></div> ' + label;
+                } else {
+                    legendContainer.innerHTML = '';
+                }
+            }
+        }
+    });
+</script>
+
   <!--end of chart-->
 {% endblock %}
 
