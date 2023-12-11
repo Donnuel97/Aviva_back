@@ -7,61 +7,8 @@
 </head>
 <body>
 
-  {% for images in images_list %}
-    <div>
-      {% if images.image1_base64 %}
-        <img id="blobImage1" src="data:image/jpeg;base64,{{ images.image1_base64 }}">
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-              var blobImage1 = document.getElementById('blobImage1');
-  
-              // Check if the element with ID 'blobImage1' exists
-              if (blobImage1) {
-                var blob1DataUrl = blobImage1.src;
-  
-                fetch(blob1DataUrl)
-                  .then(res => res.blob())
-                  .then(blob => {
-                    // Create an Object URL for the Blob
-                    var objectUrl = URL.createObjectURL(blob);
-  
-                    // Create a new image element with the Object URL
-                    var newImage = document.createElement('img');
-                    newImage.src = objectUrl;
-  
-                    // Replace the original img element with the new one
-                    blobImage1.parentNode.replaceChild(newImage, blobImage1);
-                  });
-              }
-            });
-          </script>
-      {% else %}
-        <p>No Image 1 available</p>
-      {% endif %}
-    </div>
-
-    <br>
-
-    <div>
-      {% if images.aceticacid_base64 %}
-        <img src="data:image/png;base64,{{ images.aceticacid_base64 }}" alt="Acetic Acid Image">
-      {% else %}
-        <p>No Acetic Acid Image available</p>
-      {% endif %}
-    </div>
-
-    <br>
-
-    <div>
-      {% if images.lugolsiodine_base64 %}
-        <img src="data:image/png;base64,{{ images.lugolsiodine_base64 }}" alt="Lugol's Iodine Image">
-      {% else %}
-        <p>No Lugol's Iodine Image available</p>
-      {% endif %}
-    </div>
-
-    <hr>
+  {% for image in images_list %}
+    <img src="{{ image}}" alt="Image" style='height:100px;width:100px;'>
   {% endfor %}
-
 </body>
 </html>

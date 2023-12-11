@@ -15,11 +15,11 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'), 
 
     path('reviewed', ReviewedListView.as_view(), name='reviewed'),
-    #path('cervic-data/<int:pk>', CervicDataDetailView.as_view(), name='cervic_data_detail'),
+    path('cervic-data/<int:pk>', CervicDataDetailView.as_view(), name='cervic_data_detail'),
     
    
     path('report', CervicDataFilterView.as_view(), name='report'),
     path('get_facilities/',  GetFacilitiesView.as_view(), name='get_facilities'),
-     path('test', display_images, name='display_images'),
+    path('test', display_images, name='display_images'),
 ]
 

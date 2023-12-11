@@ -10,6 +10,7 @@ from .models import AllUsers,CervicData
 from .decorators import login_required
 import matplotlib.pyplot as plt
 from django.db.models import Count, Case, When, IntegerField
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import base64
 from PIL import Image
 from io import BytesIO
@@ -73,7 +74,7 @@ def logout(request):
 #view in charge of first dashboard page
 @method_decorator(login_required, name='dispatch')
 class DashboardView(TemplateView):
-    template_name = 'dashboard2/dashboard.html'
+    template_name = 'dashboard/dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -92,7 +93,7 @@ class DashboardView(TemplateView):
             patients_without_final_diagnosis = CervicData.objects.filter(final_diagnosis='').count()
 
             # d) Total number of patients with initial_diagnosis as "positive"
-            patients_with_positive_initial_diagnosis = CervicData.objects.filter(initial_diagnosis='positive').count()
+            patients_with_positive_initial_diagnosis = CervicData.objects.filter(final_diagnosis='positive').count()
 
             # Save the values in the session for future use
             self.request.session['dashboard_values'] = {
@@ -124,8 +125,10 @@ class DashboardView(TemplateView):
 @method_decorator(login_required, name='dispatch')
 class ReviewedListView(ListView):
     model = CervicData
-    template_name = 'dashboard2/reviewed.html'
+    template_name = 'dashboard/reviewed.html'
     context_object_name = 'cervic_data'
+    # Set the number of items per page
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -144,7 +147,7 @@ class ReviewedListView(ListView):
             patients_without_final_diagnosis = CervicData.objects.filter(final_diagnosis='').count()
 
             # d) Total number of patients with initial_diagnosis as "positive"
-            patients_with_positive_initial_diagnosis = CervicData.objects.filter(initial_diagnosis='positive').count()
+            patients_with_positive_initial_diagnosis = CervicData.objects.filter(final_diagnosis='positive').count()
 
             # Save the values in the session for future use
             self.request.session['dashboard_values'] = {
@@ -169,6 +172,9 @@ class ReviewedListView(ListView):
         context['patients_without_final_diagnosis'] = patients_without_final_diagnosis
         context['patients_with_positive_initial_diagnosis'] = patients_with_positive_initial_diagnosis
 
+         # Get the page number from the request's GET parameters
+        
+
         return context
 
     def get_queryset(self):
@@ -189,7 +195,7 @@ class ReviewedListView(ListView):
 @method_decorator(login_required, name='dispatch')
 class PendingListView(ListView):
     model = CervicData
-    template_name = 'dashboard2/pending.html'
+    template_name = 'dashboard/pending.html'
     context_object_name = 'cervic_data'
 
     def get_context_data(self, **kwargs):
@@ -209,7 +215,7 @@ class PendingListView(ListView):
             patients_without_final_diagnosis = CervicData.objects.filter(final_diagnosis='').count()
 
             # d) Total number of patients with initial_diagnosis as "positive"
-            patients_with_positive_initial_diagnosis = CervicData.objects.filter(initial_diagnosis='positive').count()
+            patients_with_positive_initial_diagnosis = CervicData.objects.filter(final_diagnosis='positive').count()
 
             # Save the values in the session for future use
             self.request.session['dashboard_values'] = {
@@ -250,6 +256,25 @@ class PendingListView(ListView):
         return response
     
 
+def display_images(request):
+    cervic_data_list = CervicData.objects.all()
+
+    if cervic_data_list:
+        images_list = []
+       
+        for cervic_data in cervic_data_list:
+            images_list.append(
+                 cervic_data.image_base64.decode(),   
+            )
+       
+        context = {
+            'images_list': images_list,
+        }
+
+        return render(request, 'test.html', context)
+    else:
+        return HttpResponse("No data found in the database.")
+
 #view in charge of image detail page
 @method_decorator(login_required, name='dispatch')
 class CervicDataDetailView(DetailView):
@@ -262,52 +287,26 @@ class CervicDataDetailView(DetailView):
         fullname = self.request.session.get('fullname', '')
         context['fullname'] = fullname
 
-        # Retrieve the CervicData instance
         cervic_data = self.get_object()
+        if cervic_data.image_base64:
+            image_base64 = cervic_data.image_base64.decode()
+            aceticacid_base64 = cervic_data.aceticacid_base64.decode()
+            lugolsiodine_base64 = cervic_data.lugolsiodine_base64.decode()
 
-        # Convert base64-encoded strings to image objects
-        image = self.decode_base64_to_image(cervic_data.image_base64)
-        acetic_acid_image = self.decode_base64_to_image(cervic_data.aceticacid_base64)
-        lugols_image = self.decode_base64_to_image(cervic_data.lugolsiodine_base64)
-
-        context['image'] = image
-        context['acetic_acid_image'] = acetic_acid_image
-        context['lugols_image'] = lugols_image
+            context['image_base64'] = image_base64
+            context['aceticacid_base64'] = aceticacid_base64
+            context['lugolsiodine_base64'] = lugolsiodine_base64
 
         return context
 
-    def decode_base64_to_image(self, base64_string):
-        if base64_string:
-            # Ensure the base64 string is in bytes
-            if isinstance(base64_string, str):
-                # Add padding if it's missing
-                padding = '=' * (4 - len(base64_string) % 4)
-                base64_string += padding
 
-                # Remove any characters that are not part of the base64 alphabet
-                base64_string = ''.join(c for c in base64_string if c.isalnum() or c in '+/')
-
-                # Convert to bytes
-                base64_data = base64_string.encode('utf-8')
-            else:
-                base64_data = base64_string
-
-            try:
-                # Decode the base64 string to bytes
-                image_data = base64.b64decode(base64_data)
-                # Create an Image object from the bytes
-                image = Image.open(BytesIO(image_data))
-                return image
-            except Exception as e:
-                print(f"Error decoding base64: {e}")
-                return None
-        return None
+    
     
     
 #view in charge of analytics page
 @method_decorator(login_required, name='dispatch')
 class AnalyticsView(TemplateView):
-    template_name = 'dashboard2/analysis.html'
+    template_name = 'dashboard/analysis.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -388,7 +387,7 @@ class AnalyticsView(TemplateView):
         context['patients_without_final_diagnosis'] = patients_without_final_diagnosis
 
         # d) Total number of patients with initial_diagnosis as "positive"
-        patients_with_positive_initial_diagnosis = CervicData.objects.filter(initial_diagnosis='positive').count()
+        patients_with_positive_initial_diagnosis = CervicData.objects.filter(final_diagnosis='positive').count()
         
 
         # Query the CervicData model for data to create the pie chart
@@ -428,7 +427,7 @@ class AnalyticsView(TemplateView):
 #view in charge of report page
 @method_decorator(login_required, name='dispatch')   
 class CervicDataFilterView(View):
-    template_name = 'dashboard2/report.html'
+    template_name = 'dashboard/report.html'
     form_class = FacilityFilterForm  # Replace with your actual form class
 
     def get(self, request):
@@ -479,10 +478,14 @@ class CervicDataFilterView(View):
                 age_count = cervic_data.filter(age__gte=min_age, age__lte=max_age).count()
                 age_counts.append((f"{min_age}-{max_age}", age_count))
 
+            # Set is_filtered to True
+            is_filtered = True
         else:
             cervic_data = CervicData.objects.all()
             total_patients_in_state = None
             age_counts = []
+            # Set is_filtered to False
+            is_filtered = False
 
         context = {
             'cervic_data': cervic_data,
@@ -491,6 +494,7 @@ class CervicDataFilterView(View):
             'selected_facility': selected_facility,
             'total_patients_in_state': total_patients_in_state,
             'age_counts': age_counts,
+            'is_filtered': is_filtered,  # Pass the is_filtered flag to the context
         }
 
         context.update(self.get_context_data())  # Add the additional context data
@@ -509,7 +513,7 @@ class CervicDataFilterView(View):
             'patients_without_final_diagnosis': CervicData.objects.filter(final_diagnosis='').count(),
 
             # d) Total number of patients with initial_diagnosis as "positive"
-            'patients_with_positive_initial_diagnosis': CervicData.objects.filter(initial_diagnosis='positive').count(),
+            'patients_with_positive_initial_diagnosis': CervicData.objects.filter(final_diagnosis='positive').count(),
         }
 
         return context
@@ -532,27 +536,3 @@ class GetFacilitiesView(View):
 
 
 
-def display_images(request):
-    cervic_data_list = CervicData.objects.all()
-
-    if cervic_data_list:
-        images_list = []
-
-        for cervic_data in cervic_data_list:
-            image1_base64 = b64encode(cervic_data.image_base64).decode('utf-8') if cervic_data.image_base64 else None
-            aceticacid_base64 = b64encode(cervic_data.aceticacid_base64).decode('utf-8') if cervic_data.aceticacid_base64 else None
-            lugolsiodine_base64 = b64encode(cervic_data.lugolsiodine_base64).decode('utf-8') if cervic_data.lugolsiodine_base64 else None
-
-            images_list.append({
-                'image1_base64': image1_base64,
-                'aceticacid_base64': aceticacid_base64,
-                'lugolsiodine_base64': lugolsiodine_base64,
-            })
-
-        context = {
-            'images_list': images_list,
-        }
-
-        return render(request, 'test.html', context)
-    else:
-        return HttpResponse("No data found in the database.")

@@ -11,30 +11,35 @@
   <img id="blobImage2">
 
   <script>
-    // Add event listener for the DOMContentLoaded event
-    document.addEventListener('DOMContentLoaded', function() {
-      // Convert Blob images present on the page
-      convertBlobImages();
-    });
+    // Move the JavaScript code inside the loop
+    var imgElement = document.getElementById('img{{ loop.index }}');
+    var base64String = '{{ imgs.image1_base64 }}';
 
-    function convertBlobImages() {
-      // Get the img elements with Blob images
-      const blobImageElements = document.querySelectorAll('img[id^="blobImage"]');
-
-      blobImageElements.forEach(function(imgElement) {
-        // Get the Blob data from the img element's src attribute
-        const imageUrl = imgElement.src;
-        fetch(imageUrl)
-          .then(response => response.blob())
-          .then(blob => {
-            // Create a Blob URL
-            const blobUrl = URL.createObjectURL(blob);
-            
-            // Set the img element's src attribute to the Blob URL
-            imgElement.src = blobUrl;
-          });
-      });
+    // Convert the base64 string to a Blob
+    var byteCharacters = atob(base64String);
+    var byteArrays = [];
+    for (var offset = 0; offset < byteCharacters.length; offset += 512) {
+      var slice = byteCharacters.slice(offset, offset + 512);
+      var byteNumbers = new Array(slice.length);
+      for (var i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      var byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
     }
+    var blob = new Blob(byteArrays, { type: 'image/jpeg' });
+
+    // Create a FileReader object
+    var reader = new FileReader();
+
+    // Define the onload event handler
+    reader.onload = function (e) {
+        // Set the src attribute of the img element with the Base64 string
+        imgElement.src = e.target.result;
+    };
+
+    // Read the Blob as a data URL (Base64)
+    reader.readAsDataURL(blob);
   </script>
 </body>
 </html>

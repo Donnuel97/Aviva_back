@@ -1,5 +1,105 @@
-/* Define common styles for both buttons */
+.select-menu {
+    display: inline-block;
+    margin-right: 10px; /* Adjust the margin as needed */
+}
+.select-menu .select-btn {
+    display: flex;
+    height: 40px;
+    background: #fff;
+    padding: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    border-radius: 8px;
+    align-items: center;
+    cursor: pointer;
+    justify-content: space-between;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;
+}
+
+/* Styles for the input field */
+.select-menu .select-btn .sBtn-input {
+    flex: 1; /* Expand the input field to take available space */
+    border: none;
+    outline: none;
+    flex-grow: 1;
+}
+
+/* Styles for the dropdown icon */
+.select-menu .select-btn i {
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+/* Rotate the icon when the dropdown is active */
+.select-menu.active .select-btn i {
+    transform: rotate(-180deg);
+}
+
+/* Styles for the options container */
+.select-menu .options {
+    position: relative;
+    padding: 20px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+/* Display the options when the dropdown is active */
+.select-menu.active .options {
+    display: block;
+}
+
+/* Styles for individual options */
+.options .option {
+    display: flex;
+    height: 40px;
+    cursor: pointer;
+    padding: 0 16px;
+    border-radius: 8px;
+    align-items: center;
+    background: #fff;
+}
+
+/* Highlight the option on hover */
+.options .option:hover {
+    background: #F2F2F2;
+}
+
+/* Styles for the icon within the option */
+.option i {
+    font-size: 14px;
+    margin-right: 12px;
+}
+
+/* Styles for the text within the option */
+.option .option-text {
+    font-size: 14px;
+    color: #333;
+}
+
+.filter-button-container {
+    display: inline-block;
+    vertical-align: top; /* Align the button with the top of the dropdowns */
+}
+.filter-button-container .submit-button{
+    height: 40px;
+    background: #007bff; /* Example background color */
+    color: #fff; /* Example text color */
+    font-size: 14px;
+    font-weight: 400;
+    border: none;
+    border-radius: 8px;
+    padding: 0 20px;
+    margin-left: 20px; /* Add spacing between dropdown and button */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
 .custom-button {
+    
     padding: 10px 20px;
     background-color: #007bff; /* Blue background color */
     color: #fff; /* White text color */
