@@ -9,6 +9,7 @@
 	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
 	<!-- My CSS -->
 	<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+	<link rel="stylesheet" href="{% static 'css/analysis.css' %}">
     
     
 
@@ -21,7 +22,7 @@
 	<!-- SIDEBAR -->
 	<section id="sidebar">
 		
-			<a href="index.html" class="brand">
+			<a href="{% url 'home' %}" class="brand">
 				<div class="logo">
                     <img class='bx' src="{% static 'img/icon.png' %}">
 				
@@ -66,12 +67,7 @@
 			
 		</ul>
 		<ul class="side-menu">
-			<li>
-				<a href="#">
-					<i class='bx bxs-cog' ></i>
-					<span class="text">Settings</span>
-				</a>
-			</li>
+			
 			{%  include 'dashboard/logout.html' %}
 		</ul>
 	</section>
@@ -105,6 +101,21 @@
 				<div class="left">
 					<h1>Analysis</h1>
 					<ul class="breadcrumb">
+						
+						{% if selected_state %}
+						<li>
+							<a href="{% url 'home' %}">Home</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						<li>
+							<a  href="{% url 'analytics' %}">Analytics</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						<li>
+							<a class="active"class="active" href="">{{ selected_state }}</a>
+						</li>
+						
+						{% else %}
 						<li>
 							<a href="{% url 'home' %}">Home</a>
 						</li>
@@ -112,41 +123,65 @@
 						<li>
 							<a class="active" href="{% url 'analytics' %}">Analytics</a>
 						</li>
+						{% endif %}
 					</ul>
 				</div>
 				
 			</div>
 
 			
-
+<!-- State filter form -->
+<form method="get" action="{% url 'analytics' %}">
+    <label for="state">Select State:</label>
+    <div class="select-menu">
+		<div class="select-btn">
+			<select id="id_state" name="state" class="sBtn-input">
+				<option class="option" value="" {% if not selected_state %}selected{% endif %}>All States</option>
+				<!-- Add options dynamically based on your data -->
+				{% for state in states %}
+					<option class="option" value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}</option>
+				{% endfor %}
+			</select>
+		</div>
+	</div>
+    <div class="filter-button-container">
+		<button type="submit" class="submit-button">Filter</button>
+	</div>
+</form>
+{% if selected_state %}
+    <p>Displaying data for state: {{ selected_state }}</p>
+{% else %}
+    <p>Displaying data for all states</p>
+{% endif %}
            
-						            
-		          
-			<!--Beginning of chart-->
-			<div class="charts">
+		<!-- Beginning of chart -->
+		<div class="charts">
+			<div class="charts-card">
+				<h2 class="chart-title"></h2>
+				<div id="bar-chart">
+					<img src="data:image/png;base64,{{ bar_chart_image }}" alt="Bar Chart" width="600" height="500">
+				</div>
+			</div>
 
 			<div class="charts-card">
-				<h2 class="chart-title">Number of women screened</h2>
-				<div id="bar-chart">
-				<img src="data:image/png;base64,{{ bar_chart_image }}" alt="Bar Chart" width="500" height="500" >
-				</div>
-			</div>
-	
-			<div class="charts-card">
-				<h2 class="chart-title">Number Of Patients Who Had Cryotherapy/Thermal Ablation</h2>
+				<h2 class="chart-title"></h2>
 				<div id="area-chart">
-				<img src="data:image/png;base64,{{ area_chart_image }}" alt="Area Chart" width="500" height="500">
+					<img src="data:image/png;base64,{{ area_chart_image }}" alt="Area Chart" width="600" height="500">
 				</div>
 			</div>
+
 			<div class="charts-card">
 				<h2 class="chart-title">Results</h2>
-				<div id="area-chart">
-				<img src="data:image/png;base64,{{ pie_chart_image }}" alt="Area Chart" width="500" height="500">
+				<div id="pie-chart">
+					<img src="data:image/png;base64,{{ pie_chart_image }}" alt="Pie Chart" width="600" height="600">
 				</div>
 			</div>
-	
-			</div>
-			<!--end of chart-->
+		</div>
+		<!-- End of chart -->
+
+
+
+
 		
 				
 		

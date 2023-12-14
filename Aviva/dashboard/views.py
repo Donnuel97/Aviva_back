@@ -14,8 +14,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import base64
 from PIL import Image
 from io import BytesIO
-from django.db.models import Count
-from django.db.models import Q 
+from django.db.models import Count, Q, When, Case, IntegerField
+import matplotlib.pyplot as plt
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.views.decorators.http import require_POST
@@ -256,24 +256,7 @@ class PendingListView(ListView):
         return response
     
 
-def display_images(request):
-    cervic_data_list = CervicData.objects.all()
 
-    if cervic_data_list:
-        images_list = []
-       
-        for cervic_data in cervic_data_list:
-            images_list.append(
-                 cervic_data.image_base64.decode(),   
-            )
-       
-        context = {
-            'images_list': images_list,
-        }
-
-        return render(request, 'test.html', context)
-    else:
-        return HttpResponse("No data found in the database.")
 
 #view in charge of image detail page
 @method_decorator(login_required, name='dispatch')
@@ -311,6 +294,17 @@ class AnalyticsView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Get the selected state from the dropdown filter
+        selected_state = self.request.GET.get('state', None)
+
+        # Query the CervicData model with the selected state
+        cervic_data_query = CervicData.objects.all()
+        if selected_state:
+            cervic_data_query = cervic_data_query.filter(state=selected_state)
+
+        # Query the CervicData model for dropdown options
+        context['states'] = CervicData.objects.values_list('state', flat=True).distinct()
+
         # Query the CervicData model to count positive cases in different age ranges
         age_ranges = ['0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71+']
         age_conditions = [
@@ -327,10 +321,10 @@ class AnalyticsView(TemplateView):
         age_annotation = Case(*age_conditions, output_field=IntegerField())
 
         positive_age_data = (
-            CervicData.objects
+            cervic_data_query
             .annotate(age_group=age_annotation)
             .values('age_group')
-            .annotate(total_positives=Count('id', filter=Q(initial_diagnosis='positive')))
+            .annotate(total_positives=Count('id', filter=Q(final_diagnosis='positive')))
             .order_by('age_group')
         )
 
@@ -343,14 +337,14 @@ class AnalyticsView(TemplateView):
         plt.bar(age_groups, total_positives)
         plt.xlabel('Age Range')
         plt.ylabel('Total Positives')
-        plt.title('Total Positives by Age Range')
+        plt.title(f'Total Positives by Age Range ({selected_state if selected_state else "All States"})')
         plt.xticks(rotation=45)
 
         # Query the CervicData model for data to create the area chart
         data_for_area_chart = (
-            CervicData.objects
+            cervic_data_query
             .values('date_submitted')
-            .annotate(total_positives=Count('id', filter=Q(initial_diagnosis='positive')))
+            .annotate(total_positives=Count('id', filter=Q(final_diagnosis='positive')))
             .order_by('date_submitted')
         )
 
@@ -363,7 +357,29 @@ class AnalyticsView(TemplateView):
         plt.fill_between(date_submitted, total_positives_area, alpha=0.5)
         plt.xlabel('Date Submitted')
         plt.ylabel('Total Positives')
-        plt.title('Total Positives Over Time')
+        plt.title(f'Total Positives Over Time ({selected_state if selected_state else "All States"})')
+
+        # Query the CervicData model for data to create the pie chart
+        final_diagnosis_data = cervic_data_query.values('final_diagnosis').annotate(count=Count('id'))
+
+        # Create data for the pie chart
+        labels = [data['final_diagnosis'] for data in final_diagnosis_data]
+        count = [data['count'] for data in final_diagnosis_data]
+
+        # Create the pie chart
+        pie_chart_fig = plt.figure(figsize=(6, 6))
+        plt.pie(count, labels=labels, autopct='%1.1f%%', startangle=140)
+        plt.title(f'Distribution of Final Diagnoses ({selected_state if selected_state else "All States"})')
+
+        # Save the pie chart image as base64 and pass it to the template
+        buffer = BytesIO()
+        plt.figure(pie_chart_fig)
+        plt.savefig(buffer, format='png')
+        pie_chart_image = buffer.getvalue()
+        buffer.close()
+        pie_chart_image_base64 = base64.b64encode(pie_chart_image).decode()
+
+        context['pie_chart_image'] = pie_chart_image_base64
 
         # Save the chart images as base64 and pass them to the template
         chart_images = []
@@ -374,54 +390,13 @@ class AnalyticsView(TemplateView):
             chart_image = buffer.getvalue()
             buffer.close()
             chart_images.append(base64.b64encode(chart_image).decode())
-        # a) Total number of patients
-        total_patients = CervicData.objects.count()
-        context['total_patients'] = total_patients
 
-        # b) Total number of patients with final diagnosis data
-        patients_with_final_diagnosis = CervicData.objects.exclude(final_diagnosis='').count()
-        context['patients_with_final_diagnosis'] = patients_with_final_diagnosis
-
-        # c) Total number of patients without final diagnosis data
-        patients_without_final_diagnosis = CervicData.objects.filter(final_diagnosis='').count()
-        context['patients_without_final_diagnosis'] = patients_without_final_diagnosis
-
-        # d) Total number of patients with initial_diagnosis as "positive"
-        patients_with_positive_initial_diagnosis = CervicData.objects.filter(final_diagnosis='positive').count()
-        
-
-        # Query the CervicData model for data to create the pie chart
-        final_diagnosis_data = CervicData.objects.values('final_diagnosis').annotate(count=Count('id'))
-        fullname = self.request.session.get('fullname', '')
-
-        
-
-        # Create data for the pie chart
-        labels = [data['final_diagnosis'] for data in final_diagnosis_data]
-        count = [data['count'] for data in final_diagnosis_data]
-
-        # Create the pie chart
-        pie_chart_fig = plt.figure(figsize=(6, 6))
-        plt.pie(count, labels=labels, autopct='%1.1f%%', startangle=140)
-        plt.title('Distribution of Final Diagnoses')
-
-        # Save the pie chart image as base64 and pass it to the template
-        buffer = BytesIO()
-        plt.figure(pie_chart_fig)
-        plt.savefig(buffer, format='png')
-        pie_chart_image = buffer.getvalue()
-        buffer.close()
-        pie_chart_image_base64 = base64.b64encode(pie_chart_image).decode()
-        
-        context['fullname'] = fullname
-        context['final_diagnosis_data'] = final_diagnosis_data
-        context['pie_chart_image'] = pie_chart_image_base64
-        context['patients_with_positive_initial_diagnosis'] = patients_with_positive_initial_diagnosis
-        
+        context['selected_state'] = selected_state
         context['bar_chart_image'] = chart_images[0]
         context['area_chart_image'] = chart_images[1]
 
         return context
+
 
 
 #view in charge of report page
@@ -478,14 +453,10 @@ class CervicDataFilterView(View):
                 age_count = cervic_data.filter(age__gte=min_age, age__lte=max_age).count()
                 age_counts.append((f"{min_age}-{max_age}", age_count))
 
-            # Set is_filtered to True
-            is_filtered = True
         else:
             cervic_data = CervicData.objects.all()
             total_patients_in_state = None
             age_counts = []
-            # Set is_filtered to False
-            is_filtered = False
 
         context = {
             'cervic_data': cervic_data,
@@ -494,7 +465,6 @@ class CervicDataFilterView(View):
             'selected_facility': selected_facility,
             'total_patients_in_state': total_patients_in_state,
             'age_counts': age_counts,
-            'is_filtered': is_filtered,  # Pass the is_filtered flag to the context
         }
 
         context.update(self.get_context_data())  # Add the additional context data

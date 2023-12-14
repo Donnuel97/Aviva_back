@@ -6,8 +6,8 @@ urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
    
     path('Pending', PendingListView.as_view(), name='pending'),
-    path('Analytics', AnalyticsView.as_view(), name='analytics'),
     
+    path('analytics/', AnalyticsView.as_view(), name='analytics'),
     
     path('', views.home, name='home'),
 
@@ -20,6 +20,6 @@ urlpatterns = [
    
     path('report', CervicDataFilterView.as_view(), name='report'),
     path('get_facilities/',  GetFacilitiesView.as_view(), name='get_facilities'),
-    path('test', display_images, name='display_images'),
+    
 ]
 

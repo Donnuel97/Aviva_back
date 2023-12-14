@@ -9,6 +9,7 @@
 	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
 	<!-- My CSS -->
 	<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+	<link rel="stylesheet" href="{% static 'css/pagenation.css' %}">
 
 	<title>AVIVA | Dashboard</title>
 </head>
@@ -18,7 +19,7 @@
 	<!-- SIDEBAR -->
 	<section id="sidebar">
 		
-			<a href="index.html" class="brand">
+			<a href="{% url 'home' %}" class="brand">
 				<div class="logo">
                     <img class='bx' src="{% static 'img/icon.png' %}">
 				
@@ -63,12 +64,7 @@
 			
 		</ul>
 		<ul class="side-menu">
-			<li>
-				<a href="#">
-					<i class='bx bxs-cog' ></i>
-					<span class="text">Settings</span>
-				</a>
-			</li>
+			
 			{%  include 'dashboard/logout.html' %}
 		</ul>
 	</section>
@@ -163,49 +159,7 @@
 		<!-- MAIN -->
 	</section>
 	<!-- CONTENT -->
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-		  const table = document.querySelector(".table-data table");
-		  const tbody = table.querySelector("tbody");
-		  const itemsPerPage = 10; // Set the number of items per page
-	  
-		  let currentPage = 1;
-		  let rows = Array.from(tbody.querySelectorAll("tr"));
-	  
-		  function showPage(page) {
-			const start = (page - 1) * itemsPerPage;
-			const end = start + itemsPerPage;
-	  
-			rows.forEach((row, index) => {
-			  row.style.display = index >= start && index < end ? "table-row" : "none";
-			});
-		  }
-	  
-		  function updatePaginationButtons() {
-			const totalPages = Math.ceil(rows.length / itemsPerPage);
-	  
-			const paginationContainer = document.createElement("div");
-			paginationContainer.className = "pagination";
-	  
-			for (let i = 1; i <= totalPages; i++) {
-			  const button = document.createElement("button");
-			  button.textContent = i;
-			  button.addEventListener("click", function () {
-				currentPage = i;
-				showPage(currentPage);
-			  });
-	  
-			  paginationContainer.appendChild(button);
-			}
-	  
-			table.parentNode.insertBefore(paginationContainer, table.nextSibling);
-		  }
-	  
-		  // Initial setup
-		  showPage(currentPage);
-		  updatePaginationButtons();
-		});
-	  </script>
+	<script src="{% static 'js/pagenation.js' %}"></script>
     <script src="{% static 'js/script2.0.js' %}"></script>
 	
 </body>

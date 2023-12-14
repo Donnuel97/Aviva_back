@@ -33,7 +33,7 @@
 	<!-- SIDEBAR -->
 	<section id="sidebar">
 		
-			<a href="index.html" class="brand">
+            <a href="{% url 'home' %}" class="brand">
 				<div class="logo">
                     <img class='bx' src="{% static 'img/icon.png' %}">
 				
@@ -78,12 +78,6 @@
 			
 		</ul>
 		<ul class="side-menu">
-			<li>
-				<a href="#">
-					<i class='bx bxs-cog' ></i>
-					<span class="text">Settings</span>
-				</a>
-			</li>
 			{%  include 'dashboard/logout.html' %}
 		</ul>
 	</section>
@@ -162,10 +156,10 @@
                     </form>
                 
                     <div class="btn-download" style="margin-top: 10px;">
-                        {% if is_filtered %}
+                        
                             <button id="export-pdf" class="custom-button pdf-button">Export as PDF</button>
                             <button id="downloadexcel" class="custom-button excel-button">Export as Excel</button>
-                        {% endif %}
+                        
                     </div>
                         
                     <table id="table">
@@ -224,27 +218,64 @@
 	</section>
 	<!-- CONTENT -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" charset="utf-8"></script>
-<script>
-// JavaScript to update facility choices based on selected state
-$('#id_state').change(function () {
-    var stateId = $(this).val();
-    $.ajax({
-        url: '/get_facilities/',
-        data: {
-            'state_id': stateId
-        },
-        dataType: 'json',
-        success: function (data) {
-            var facilitySelect = $('#id_facility');
-            facilitySelect.empty();
-            facilitySelect.append('<option value="All Facilities">All Facilities</option>');
-            $.each(data.facilities, function (key, value) {
-                facilitySelect.append('<option value="' + key + '">' + value + '</option>');
+    <!-- Update your existing JavaScript code or add this script to your HTML file -->
+    <script>
+        $(document).ready(function () {
+          // Function to enable/disable filter button
+          function toggleFilterButton() {
+            var stateSelected = $('#id_state').val() !== 'All States';
+            var facilitySelected = $('#id_facility').val() !== 'All Facilities';
+            var filterButton = $('.submit-button');
+            var pdfButton = $('#export-pdf');
+            var excelButton = $('#downloadexcel');
+      
+            filterButton.prop('disabled', !(stateSelected && facilitySelected));
+            
+            // Enable or disable export buttons based on the filter button's status
+            pdfButton.prop('disabled', filterButton.prop('disabled'));
+            excelButton.prop('disabled', filterButton.prop('disabled'));
+          }
+      
+          // Update facility choices based on selected state
+          $('#id_state').change(function () {
+            var stateId = $(this).val();
+            $.ajax({
+              url: '/get_facilities/',
+              data: {
+                'state_id': stateId
+              },
+              dataType: 'json',
+              success: function (data) {
+                var facilitySelect = $('#id_facility');
+                facilitySelect.empty();
+                facilitySelect.append('<option value="All Facilities">All Facilities</option>');
+                $.each(data.facilities, function (key, value) {
+                  facilitySelect.append('<option value="' + key + '">' + value + '</option>');
+                });
+      
+                // Check and toggle the filter button when the state changes
+                toggleFilterButton();
+              }
             });
-        }
-    });
-});
-</script>
+          });
+      
+          // Check and toggle the filter button when the facility changes
+          $('#id_facility').change(function () {
+            toggleFilterButton();
+          });
+      
+          // Toggle the filter button when it's clicked
+          $('.submit-button').click(function () {
+            toggleFilterButton();
+          });
+      
+          // Initial check and toggle when the page loads
+          toggleFilterButton();
+        });
+    </script>
+    
+  
+        
     <script type="text/javascript" src="{% static 'js/table2excel.js' %}"></script>
     <script src="{% static 'js/report.js' %}"></script>
     
