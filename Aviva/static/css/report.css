@@ -4,7 +4,7 @@
 }
 .select-menu .select-btn {
     display: flex;
-    height: 40px;
+    height: 20px;
     background: #fff;
     padding: 20px;
     font-size: 14px;
@@ -83,7 +83,7 @@
     display: inline-block;
     vertical-align: top; /* Align the button with the top of the dropdowns */
 }
-.filter-button-container .submit-button{
+.filter-button-container .sbt-button{
     height: 40px;
     background: #007bff; /* Example background color */
     color: #fff; /* Example text color */

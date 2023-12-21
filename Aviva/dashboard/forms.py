@@ -1,6 +1,18 @@
 from django import forms
 from .models import CervicData
+from .models import AllUsers
 
+class UserFilterForm(forms.Form):
+    usercategory = forms.ChoiceField(choices=[], required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Populate choices dynamically from the database
+        usercategories = AllUsers.objects.values_list('usercategory', flat=True).distinct()
+        self.fields['usercategory'].choices = [('', 'All')] + [(category, category) for category in usercategories]
+
+
+        
 class FacilityFilterForm(forms.Form):
     state = forms.ChoiceField(
         choices=[('All States', 'All States')] + [(state, state) for state in CervicData.objects.values_list('state', flat=True).distinct()],

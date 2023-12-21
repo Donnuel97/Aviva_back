@@ -20,6 +20,8 @@ urlpatterns = [
    
     path('report', CervicDataFilterView.as_view(), name='report'),
     path('get_facilities/',  GetFacilitiesView.as_view(), name='get_facilities'),
+
+    path('users', views.UserListView.as_view(), name="user_list"),
     
 ]
 

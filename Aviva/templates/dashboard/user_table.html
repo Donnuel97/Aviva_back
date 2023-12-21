@@ -1,0 +1,224 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<!-- My CSS -->
+	<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+	<link rel="stylesheet" href="{% static 'css/report.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+    <!-- Include the jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+    <!-- Include the js-xlsx library for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+
+    <!-- Include the TableExport library -->
+    <script src="https://cdn.jsdelivr.net/npm/tableexport@5.2.0/dist/js/tableexport.min.js"></script>
+
+	<title>AVIVA | Dashboard</title>
+</head>
+<body>
+
+
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+		
+			<a href="{% url 'home' %}" class="brand">
+				<div class="logo">
+                    <img class='bx' src="{% static 'img/icon.png' %}">
+				
+					<span class="text">AVIVA</span>
+				</div>
+				
+				
+			</a>
+		
+		
+		<ul class="side-menu top">
+			<li >
+				<a href="{% url 'dashboard' %}">
+					<i class='bx bxs-dashboard' ></i>
+					<span class="text">Dashboard</span>
+				</a>
+			</li>
+			<li>
+				<a href="{% url 'reviewed' %}">
+					<i class='bx bxs-folder-open'></i>
+					<span class="text">Reviewed cases</span>
+				</a>
+			</li>
+			<li>
+				<a href="{% url 'pending' %}">
+					<i class='bx bxs-folder-open'></i>
+					<span class="text">Pending cases</span>
+				</a>
+			</li>
+			<li>
+				<a href="{% url 'analytics' %}">
+					<i class='bx bxs-doughnut-chart' ></i>
+					<span class="text">Analytics</span>
+				</a>
+			</li>
+			<li>
+				<a href="{% url 'report' %}">
+					<i class='bx bxs-report'></i>
+					<span class="text">Report</span>
+				</a>
+			</li>
+			
+		</ul>
+		<ul class="side-menu">
+			
+            {%  include 'dashboard/logout.html' %}
+			
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+
+
+	<!-- CONTENT -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu' ></i>
+		
+			<form action="#">
+				<div class="form-input">
+				
+				</div>
+			</form>
+			
+		
+            <p> Welcome to Aviva <b>{{ fullname }}</b></p>
+			<a href="#" class="profile">
+				
+			</a>
+		</nav>
+		<!-- NAVBAR -->
+
+		<!-- MAIN -->
+		<main>
+			<div class="head-title">
+				<div class="left">
+					<h1>Dashboard</h1>
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">Home</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						<li>
+							<a class="active" href="#">Dashboard</a>
+						</li>
+					</ul>
+				</div>
+				
+			</div>
+
+			{%  include 'dashboard/user_display.html' %}
+		
+
+            <div class="table-data">
+				
+				<div class="order">
+					<div class="head">
+						<h3>All Users</h3>
+						<i class='bx bx-search' ></i>
+						<i class='bx bx-filter' ></i>
+					</div>
+					<form method="get" action="{% url 'user_list' %}" class="user-filter-form">
+						<div class="form-group" style="display: inline-block;">
+							<select name="usercategory" id="id_usercategory" class="form-control" style="width: 200px; height: 40px; border-radius: 8px; cursor: pointer;">
+								<option value="" {% if not request.GET.usercategory %}selected{% endif %}>All Users</option>
+								<option value="Reviewer" {% if request.GET.usercategory == 'Reviewer' %}selected{% endif %}>Reviewer</option>
+								<option value="Casefinder" {% if request.GET.usercategory == 'Casefinder' %}selected{% endif %}>Casefinder</option>
+								<!-- Add more options for other user categories as needed -->
+							</select>
+						</div>
+						<button type="submit" style='height: 40px; background: #007bff; color: #fff; font-size: 14px; font-weight: 400; border: none; border-radius: 8px; padding: 0 20px; margin-left: 20px; cursor: pointer; display: inline-block; align-items: center;'>Filter</button>
+					</form>
+					
+					<div class="btn-download" style="margin-top: 10px;">
+                        
+						<button onclick="Export()" id="btnExport" class="custom-button pdf-button">Export as PDF</button>
+						<button id="downloadexcel" class="custom-button excel-button">Export as Excel</button>
+					
+					</div>
+					<br>
+					
+					<table id="table">
+						<thead>
+							<tr>
+								<th>Users Fullname</th>
+								<th>Email</th>
+								<th>Phone</th>
+								<th>State</th>
+								<th>Facility</th>
+								<th>Category</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for user in all_users %}
+								<tr>
+									<td style='font-size: 12px;'>{{ user.fullname }}</td>
+									<td style='font-size: 12px;'>{{ user.email }}</td>
+									<td style='font-size: 12px;'>{{ user.phone }}</td>
+									<td style='font-size: 12px;'>{{ user.state }}</td>
+                                    <td style='font-size: 12px;'>{{ user.facility }}</td>
+                                    <td style='font-size: 12px;'>{{ user.usercategory }}</td>
+			
+								</tr>
+								
+							{% empty %}
+								<tr>
+									<td colspan="7">No data available</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+					
+		
+					
+				</div>
+			</div>
+		</main>
+		<!-- MAIN -->
+	</section>
+	<!-- CONTENT -->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.22/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script type="text/javascript">
+        function Export() {
+			var currentDate = new Date().toISOString().slice(0, 10); // Get the current date in YYYY-MM-DD format
+		
+			html2canvas(document.getElementById('table'), {
+				onrendered: function (canvas) {
+					var data = canvas.toDataURL();
+					var docDefinition = {
+						content: [{
+							image: data,
+							width: 500
+						}]
+					};
+					var pdfFileName = "User_Report_" + currentDate + ".pdf"; // Modify the file name to include the current date
+					pdfMake.createPdf(docDefinition).download(pdfFileName);
+				}
+			});
+		}
+		
+    </script>
+	<script type="text/javascript" src="{% static 'js/table2excel.js' %}"></script>
+    <script src="{% static 'js/report.js' %}"></script>
+    
+    <script src="{% static 'js/script2.0.js' %}"></script>
+	
+</body>
+</html>

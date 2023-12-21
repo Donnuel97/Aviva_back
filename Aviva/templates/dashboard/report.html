@@ -129,86 +129,168 @@
                         {% csrf_token %}
                 
                         <div class="overview-dropdown">
-                            <div class="select-menu">
-                                <div class="select-btn">
-                                    <select id="id_state" name="state" class="sBtn-input">
+                            
+                                    <select name="state" class="sBtn-input" style="width: 200px; height:40px; border-radius: 8px;cursor: pointer;">
                                         {% for state, state_name in form.state.field.choices %}
                                             <option class="option" value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state_name }}</option>
                                         {% endfor %}
                                     </select>
-                                </div>
-                            </div>
-                
-                            <div class="select-menu">
-                                <div class="select-btn">
-                                    <select id="id_facility" name="facility" class="sBtn-input">
+                                
+                        
+                           
+                                    <select name="facility" class="sBtn-input" style="width: 200px; height:40px; border-radius: 8px;cursor: pointer;">
                                         {% for facility, facility_name in form.facility.field.choices %}
                                             <option class="option" value="{{ facility }}" {% if facility == selected_facility %}selected{% endif %}>{{ facility_name }}</option>
                                         {% endfor %}
                                     </select>
-                                </div>
-                            </div>
-                
+                                
+                        
                             <div class="filter-button-container">
-                                <button type="submit" class="submit-button">Filter</button>
+                                <button type="submit" class="sbt-button" style='height: 40px; background: #007bff;color: #fff;font-size: 14px;font-weight: 400;border: none;border-radius: 8px;padding: 0 20px;margin-left: 20px;cursor: pointer;display: flex;align-items: center;'>Filter</button>
                             </div>
                         </div>
+                        
                     </form>
-                
+                    {% if age_counts %}
                     <div class="btn-download" style="margin-top: 10px;">
                         
-                            <button id="export-pdf" class="custom-button pdf-button">Export as PDF</button>
+                            <button onclick="Export()" id="btnExport" class="custom-button pdf-button">Export as PDF</button>
                             <button id="downloadexcel" class="custom-button excel-button">Export as Excel</button>
                         
                     </div>
-                        
+                    {% endif %}
+                    
                     <table id="table">
+                        <h2></h2>
+                        
+                        
+                        
+                        
                         <tbody>
-                            {% if total_patients_in_state %}                               
+                            {% if form.is_bound and total_entries_in_database%}
+                                {% if number_of_states %}
+                                    <tr>
+                                        <td><b>Number of States:</b></td><td> {{ number_of_states }}</td>
+                                    </tr>
+                                    <p> </p>
+                                {% endif %}
+                                {% if number_of_facilitiies %}
+                                
+                                <tr><td><b>Number of Facilities:</b></td><td> {{ number_of_facilitiies }}</td></tr>
+                                {% endif %}
+                                <tr>
+                                    <td><b>Total Patients accross states:</b></td><td> {{ total_entries_in_database }}</td>
+                                </tr>
+                                
+                                {% if total_positives_in_database %}
+                                
+                                <tr><td><b>Total Positives :</b></td><td> {{ total_positives_in_database }}</td></tr>
+                                {% endif %}
+                                {% if total_negatives_in_database %}
+                                
+                                <tr><td><b>Total Negatives :</b></td><td> {{ total_negatives_in_database }}</td></tr>
+                                {% endif %}
+                               
+                                
+                            {% endif %}
+                           
+                           <!-- Inside the <tbody> tag where you display other information -->
+                            {% if total_facilities_in_state %}
                             <tr>
                                 <td>
-                                    <b>State</b>
+                                    <b>Total Facilities in State</b>
                                 </td>
                                 <td>
-                                    {{ selected_state }}</p>                                 
+                                    {{ total_facilities_in_state }}
                                 </td>
-                                
                                 <!-- Add more table cells for other fields -->
                             </tr>
                             {% endif %}
 
-                            {% if selected_facility %}
+                            {% if total_entries_in_facility %}
                             <tr>
                                 <td>
-                                    <b>Facility</b>
+                                    <b>Total Entries in Facility</b>
                                 </td>
                                 <td>
-                                    {{ selected_facility }}
+                                    {{ total_entries_in_facility }}
                                 </td>
-                                
+                                <!-- Add more table cells for other fields -->
+                            </tr>
+                            {% endif %}
+                            {% if  total_entries_in_state %}
+                            <tr>
+                                <td>
+                                    <b> Total Patients</b>
+                                </td>
+                                <td>
+                                    {{  total_entries_in_state }}
+                                </td>
                                 <!-- Add more table cells for other fields -->
                             </tr>
                             {% endif %}
 
-                            {% if total_patients_in_state %}
+                            {% if total_positives_in_state %}
                             <tr>
                                 <td>
-                                    <b>Number of women</b>
+                                    <b>Total Positives in State</b>
                                 </td>
                                 <td>
-                                    {{ total_patients_in_state }}</p>
+                                    {{ total_positives_in_state }}
                                 </td>
-                                
+                                <!-- Add more table cells for other fields -->
+                            </tr>
+                            {% endif %}
+
+                            {% if total_negatives_in_state %}
+                            <tr>
+                                <td>
+                                    <b>Total Negatives in State</b>
+                                </td>
+                                <td>
+                                    {{ total_negatives_in_state }}
+                                </td>
                                 <!-- Add more table cells for other fields -->
                             </tr>
                             {% endif %}
                             
-                            {% for age_range, age_count in age_counts %}
+                            {% if  total_other_diagnoses_in_state %}
                             <tr>
-                                <td>{{ age_range }}</td>
-                                <td>{{ age_count }}</td>
+                                <td>
+                                    <b> Total None diagnosed</b>
+                                </td>
+                                <td>
+                                    {{  total_other_diagnoses_in_state }}
+                                </td>
+                                <!-- Add more table cells for other fields -->
                             </tr>
-                            {% endfor %}                                                                                                                                                                                              
+                            {% endif %}
+
+                            {% if age_counts %}
+                            <tr>
+                                <td colspan="4"><b>Age Range Breakdown</b></td>
+                            </tr>
+                            <tr>
+                                <td><b>Age Range</b></td>
+                                <td><b>Total Entries</b></td>
+                                <td><b>Positive Count</b></td>
+                                <td><b>Negative Count</b></td>
+                            </tr>
+                            {% for age_range, total_count, positive_count, negative_count in age_counts %}
+                                <tr>
+                                    <td>{{ age_range }}</td>
+                                    <td>{{ total_count }}</td>
+                                    <td>{{ positive_count }}</td>
+                                    <td>{{ negative_count }}</td>
+                                </tr>
+                            {% endfor %}
+                            {% endif %}
+
+
+
+                            <!-- Continue displaying other information in the table as needed -->
+
+                                                                                                                                                                                          
                         </tbody>
                     </table>                                                  										
 				</div>				
@@ -219,63 +301,29 @@
 	<!-- CONTENT -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" charset="utf-8"></script>
     <!-- Update your existing JavaScript code or add this script to your HTML file -->
-    <script>
-        $(document).ready(function () {
-          // Function to enable/disable filter button
-          function toggleFilterButton() {
-            var stateSelected = $('#id_state').val() !== 'All States';
-            var facilitySelected = $('#id_facility').val() !== 'All Facilities';
-            var filterButton = $('.submit-button');
-            var pdfButton = $('#export-pdf');
-            var excelButton = $('#downloadexcel');
-      
-            filterButton.prop('disabled', !(stateSelected && facilitySelected));
-            
-            // Enable or disable export buttons based on the filter button's status
-            pdfButton.prop('disabled', filterButton.prop('disabled'));
-            excelButton.prop('disabled', filterButton.prop('disabled'));
-          }
-      
-          // Update facility choices based on selected state
-          $('#id_state').change(function () {
-            var stateId = $(this).val();
-            $.ajax({
-              url: '/get_facilities/',
-              data: {
-                'state_id': stateId
-              },
-              dataType: 'json',
-              success: function (data) {
-                var facilitySelect = $('#id_facility');
-                facilitySelect.empty();
-                facilitySelect.append('<option value="All Facilities">All Facilities</option>');
-                $.each(data.facilities, function (key, value) {
-                  facilitySelect.append('<option value="' + key + '">' + value + '</option>');
-                });
-      
-                // Check and toggle the filter button when the state changes
-                toggleFilterButton();
-              }
-            });
-          });
-      
-          // Check and toggle the filter button when the facility changes
-          $('#id_facility').change(function () {
-            toggleFilterButton();
-          });
-      
-          // Toggle the filter button when it's clicked
-          $('.submit-button').click(function () {
-            toggleFilterButton();
-          });
-      
-          // Initial check and toggle when the page loads
-          toggleFilterButton();
-        });
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.22/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script type="text/javascript">
+        function Export() {
+			var currentDate = new Date().toISOString().slice(0, 10); // Get the current date in YYYY-MM-DD format
+		
+			html2canvas(document.getElementById('table'), {
+				onrendered: function (canvas) {
+					var data = canvas.toDataURL();
+					var docDefinition = {
+						content: [{
+							image: data,
+							width: 500
+						}]
+					};
+					var pdfFileName = "Cervic_Data_Report_" + currentDate + ".pdf"; // Modify the file name to include the current date
+					pdfMake.createPdf(docDefinition).download(pdfFileName);
+				}
+			});
+		}
+		
     </script>
-    
-  
-        
+    <script src="{% static 'js/button_disable.js' %}"></script> 
     <script type="text/javascript" src="{% static 'js/table2excel.js' %}"></script>
     <script src="{% static 'js/report.js' %}"></script>
     

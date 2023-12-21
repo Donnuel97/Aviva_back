@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView,  DetailView, TemplateView
-from .forms import FacilityFilterForm
+from .forms import FacilityFilterForm, UserFilterForm
 from django.utils.decorators import method_decorator
 import hashlib
 from .models import AllUsers,CervicData
@@ -399,11 +399,64 @@ class AnalyticsView(TemplateView):
 
 
 
+# Constants
+ALL_FACILITIES = 'All Facilities'
+ALL_STATES = 'All States'
+AGE_RANGES = [
+    (0, 19),
+    (20, 29),
+    (30, 39),
+    (40, 49),
+    (50, 59),
+    (60, 100)
+]
+
 #view in charge of report page
 @method_decorator(login_required, name='dispatch')   
 class CervicDataFilterView(View):
     template_name = 'dashboard/report.html'
     form_class = FacilityFilterForm  # Replace with your actual form class
+
+    def get_positive_negative_counts(self, cervic_data):
+        positive_diagnosis_counts = []
+        negative_diagnosis_counts = []
+
+        for age_range in AGE_RANGES:
+            min_age, max_age = age_range
+
+            positive_count = cervic_data.filter(
+                age__gte=min_age,
+                age__lte=max_age,
+                final_diagnosis='positive'
+            ).count()
+
+            negative_count = cervic_data.filter(
+                age__gte=min_age,
+                age__lte=max_age,
+                final_diagnosis='negative'
+            ).count()
+
+            positive_diagnosis_counts.append((f"{min_age}-{max_age}", positive_count))
+            negative_diagnosis_counts.append((f"{min_age}-{max_age}", negative_count))
+
+        return positive_diagnosis_counts, negative_diagnosis_counts
+
+    def get_age_counts(self, cervic_data, selected_state=None):
+        age_counts = []
+
+        for age_range in AGE_RANGES:
+            min_age, max_age = age_range
+
+            total_count = cervic_data.filter(age__gte=min_age, age__lte=max_age).count()
+            positive_count = cervic_data.filter(age__gte=min_age, age__lte=max_age, final_diagnosis='positive').count()
+            negative_count = cervic_data.filter(age__gte=min_age, age__lte=max_age, final_diagnosis='negative').count()
+
+            age_counts.append((f"{min_age}-{max_age}", total_count, positive_count, negative_count))
+
+        return age_counts
+
+
+    # Inside CervicDataFilterView class
 
     def get(self, request):
         cervic_data = CervicData.objects.all()
@@ -411,82 +464,164 @@ class CervicDataFilterView(View):
         selected_facility = None
         form = self.form_class()
 
+        # Retrieve the total number of facilities available for the selected state and all facilities
+        facilities_found = self.get_facilities_count(cervic_data, selected_state, selected_facility)
+
+        # Get total entries in the database
+        total_entries_in_database = cervic_data.count()
+
+        # Get age counts for total entries in the database
+        total_age_counts = self.get_age_counts(cervic_data)
+
         context = {
             'cervic_data': cervic_data,
             'form': form,
             'selected_state': selected_state,
             'selected_facility': selected_facility,
-            'is_filtered': False,  # Flag to indicate whether filtering is applied
+            'is_filtered': False,
+            'facilities_found': facilities_found,
+            'total_entries_in_database': total_entries_in_database,  # Add this to the context
+            'total_age_counts': total_age_counts,
         }
-
-        context.update(self.get_context_data())  # Add the additional context data
 
         return render(request, self.template_name, context)
 
+
+
+    # Inside CervicDataFilterView class
+
     def post(self, request):
         form = self.form_class(request.POST)
+        total_entries_in_database = None  # Initialize variable
+        total_positives_in_database = None
+        total_negatives_in_database = None
+        number_of_states = None
+        number_of_facilitiies = None
         if form.is_valid():
             selected_state = form.cleaned_data.get('state')
             selected_facility = form.cleaned_data.get('facility')
 
             cervic_data = CervicData.objects.all()
+            
+            
 
-            if selected_facility != 'All Facilities':
+            if selected_facility != ALL_FACILITIES:
                 cervic_data = cervic_data.filter(facility=selected_facility)
 
-            # Count total patients in the selected state
-            total_patients_in_state = cervic_data.filter(state=selected_state).count()
+            total_entries_in_state = cervic_data.filter(state=selected_state).count()
 
-            # Count total patients sorted by age ranges
-            age_ranges = [
-                (0, 19),
-                (20, 29),
-                (30, 39),
-                (40, 49),
-                (50, 59),
-                (60, 100)  # You can adjust the age ranges as needed
-            ]
-
+            # Initialize variables with default values
+            # total_patients = cervic_data.count()
+            #total_entries_in_database = None  # Initialize variable
+            total_positives_in_state = None
+            total_negatives_in_state = None
+            total_other_diagnoses_in_state = None
+            total_facilities_in_state = None
+            total_entries_in_facility = None
             age_counts = []
-            for age_range in age_ranges:
-                min_age, max_age = age_range
-                age_count = cervic_data.filter(age__gte=min_age, age__lte=max_age).count()
-                age_counts.append((f"{min_age}-{max_age}", age_count))
+            positive_diagnosis_counts, negative_diagnosis_counts = [], []
+            if selected_state == ALL_STATES and selected_facility == ALL_FACILITIES:
+            # If so, retrieve total entries for the entire database
+                total_entries_in_database = cervic_data.count()
+                total_positives_in_database = cervic_data.filter(final_diagnosis='positive').count()
+                total_negatives_in_database = cervic_data.filter(final_diagnosis='negative').count()
+                number_of_states = cervic_data.values('state').distinct().count()
+                number_of_facilitiies = cervic_data.values('facility').distinct().count()
 
+
+            # if selected_state == ALL_STATES and selected_facility == ALL_FACILITIES:
+            #     # If both 'All States' and 'All Facilities' are selected, retrieve aggregate values for the entire database
+            #     total_patients = cervic_data.count()
+            #     total_positives_in_state = cervic_data.filter(final_diagnosis='positive').count()
+            #     total_negatives_in_state = cervic_data.filter(final_diagnosis='negative').count()
+            #     total_other_diagnoses_in_state = total_entries_in_state - total_positives_in_state - total_negatives_in_state
+            #     total_facilities_in_state = cervic_data.values('facility').distinct().count()
+
+            #     # Get age counts for positive, negative, and total entries for the entire database
+            #     age_counts = self.get_age_counts(cervic_data)
+            #     positive_diagnosis_counts, negative_diagnosis_counts = self.get_positive_negative_counts(cervic_data)
+            # Check if 'All Facilities' is selected
+            if selected_facility == ALL_FACILITIES:
+                # If 'All Facilities' is selected, retrieve total entries, positives, negatives,
+                # entries with other diagnoses, facilities, and age counts for the state
+                # total_patients = total_other_diagnoses_in_state + total_positives_in_state + total_negatives_in_state
+                total_positives_in_state = cervic_data.filter(state=selected_state, final_diagnosis='positive').count()
+                total_negatives_in_state = cervic_data.filter(state=selected_state, final_diagnosis='negative').count()
+                total_other_diagnoses_in_state = total_entries_in_state - total_positives_in_state - total_negatives_in_state
+                total_facilities_in_state = cervic_data.filter(state=selected_state).values('facility').distinct().count()
+                
+
+                # Get age counts for positive, negative, and total entries
+                age_counts = self.get_age_counts(cervic_data, selected_state)
+
+                # Other logic for positive_diagnosis_counts and negative_diagnosis_counts
+                positive_diagnosis_counts, negative_diagnosis_counts = self.get_positive_negative_counts(cervic_data)
+            # elif selected_state == ALL_STATES and selected_facility == ALL_FACILITIES:
+            #     # If 'All States' and 'All Facilities' are selected, retrieve aggregate values for the entire database
+            #     total_patients = cervic_data.count()
+                
+            #     total_positives_in_state = cervic_data.filter(final_diagnosis='positive').count()
+            #     total_negatives_in_state = cervic_data.filter(final_diagnosis='negative').count()
+            #     total_other_diagnoses_in_state = total_entries_in_state - total_positives_in_state - total_negatives_in_state
+            #     total_facilities_in_state = cervic_data.values('facility').distinct().count()
+                
+            #     # Get age counts for positive, negative, and total entries for the entire database
+            #     age_counts = self.get_age_counts(cervic_data)
+            #     positive_diagnosis_counts, negative_diagnosis_counts = self.get_positive_negative_counts(cervic_data)
+            elif selected_facility:
+                # If both a state and facility are selected, retrieve positive, negative, and age counts for the facility
+                total_entries_in_facility = cervic_data.filter(state=selected_state, facility=selected_facility).count()
+                positive_diagnosis_counts, negative_diagnosis_counts = self.get_positive_negative_counts(cervic_data.filter(state=selected_state, facility=selected_facility))
+
+                # Get age counts for positive, negative, and total entries in the facility
+                age_counts = self.get_age_counts(cervic_data.filter(state=selected_state, facility=selected_facility), selected_state)
+
+                # Other logic for total_entries_in_facility
+
+            # Retrieve the total number of facilities available for the selected state and all facilities
+            facilities_found = self.get_facilities_count(cervic_data, selected_state, selected_facility)
+            
+            context = {
+                'cervic_data': cervic_data,
+                'form': form,
+                'selected_state': selected_state,
+                'selected_facility': selected_facility,
+                'total_entries_in_state': total_entries_in_state,
+                
+                'total_positives_in_state': total_positives_in_state,
+                'total_negatives_in_state': total_negatives_in_state,
+                'total_other_diagnoses_in_state': total_other_diagnoses_in_state,
+                'total_facilities_in_state': total_facilities_in_state,
+                'total_entries_in_facility': total_entries_in_facility,
+                'age_counts': age_counts,
+                'positive_diagnosis_counts': positive_diagnosis_counts,
+                'negative_diagnosis_counts': negative_diagnosis_counts,
+                'facilities_found': facilities_found,
+                'total_entries_in_database': total_entries_in_database,
+                'total_positives_in_database':total_positives_in_database,
+                'total_negatives_in_database':total_negatives_in_database,
+                'number_of_states':number_of_states,
+                'number_of_facilitiies':number_of_facilitiies,
+                
+            }
+            return render(request, self.template_name, context)
+
+        # ...
+
+
+
+
+
+    def get_facilities_count(self, cervic_data, selected_state, selected_facility):
+        # Function to retrieve the total number of facilities available for the selected state and all facilities
+        if selected_facility == ALL_FACILITIES:
+            # Count all distinct facilities for the selected state
+            facilities_found = cervic_data.filter(state=selected_state).values('facility').distinct().count()
         else:
-            cervic_data = CervicData.objects.all()
-            total_patients_in_state = None
-            age_counts = []
+            # Count the selected facility for the selected state
+            facilities_found = cervic_data.filter(state=selected_state, facility=selected_facility).count()
 
-        context = {
-            'cervic_data': cervic_data,
-            'form': form,
-            'selected_state': selected_state,
-            'selected_facility': selected_facility,
-            'total_patients_in_state': total_patients_in_state,
-            'age_counts': age_counts,
-        }
-
-        context.update(self.get_context_data())  # Add the additional context data
-
-        return render(request, self.template_name, context)
-
-    def get_context_data(self):
-        context = {
-            # a) Total number of patients
-            'total_patients': CervicData.objects.count(),
-
-            # b) Total number of patients with final diagnosis data
-            'patients_with_final_diagnosis': CervicData.objects.exclude(final_diagnosis='').count(),
-
-            # c) Total number of patients without final diagnosis data
-            'patients_without_final_diagnosis': CervicData.objects.filter(final_diagnosis='').count(),
-
-            # d) Total number of patients with initial_diagnosis as "positive"
-            'patients_with_positive_initial_diagnosis': CervicData.objects.filter(final_diagnosis='positive').count(),
-        }
-
-        return context
+        return facilities_found
 
 
 class GetFacilitiesView(View):
@@ -500,6 +635,41 @@ class GetFacilitiesView(View):
 
 
 
+#user list view
+class UserListView(ListView):
+    model = AllUsers
+    template_name = 'dashboard/user_table.html'
+    context_object_name = 'all_users'
+    form_class = UserFilterForm
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        usercategory = self.request.GET.get('usercategory', '')
+
+        if usercategory:
+            queryset = queryset.filter(usercategory=usercategory)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add the filter form to the context
+        context['form'] = self.form_class(self.request.GET)
+
+        # Total number of users
+        total_users = AllUsers.objects.count()
+        context['total_users'] = total_users
+
+        # Total number of users with usercategory as 'Reviewer'
+        reviewers_count = AllUsers.objects.filter(usercategory='Reviewer').count()
+        context['reviewers_count'] = reviewers_count
+
+        # Total number of users with usercategory as 'Casefinder'
+        casefinders_count = AllUsers.objects.filter(usercategory='Casefinder').count()
+        context['casefinders_count'] = casefinders_count
+
+        return context
 
 
 
